@@ -1,0 +1,110 @@
+- name: disable swap
+  shell: |
+    swapoff -a
+    sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+- name: modprobe
+  shell: |
+    modprobe overlay
+    modprobe br_netfilter
+
+- name: create containerd config file
+  file:
+    path: "/etc/modules-load.d/containerd.conf"
+    state: "touch"
+
+- name: add conf for containerd
+  blockinfile:
+    path: "/etc/modules-load.d/containerd.conf"
+    block: |
+      overlay
+      br_netfilter
+
+- name: set system configurations for Kubernetes networking
+  file:
+    path: "/etc/sysctl.d/99-kubernetes-cri.conf"
+    state: "touch"
+
+- name: add conf for containerd
+  blockinfile:
+    path: "/etc/sysctl.d/99-kubernetes-cri.conf"
+    block: |
+      net.bridge.bridge-nf-call-iptables  = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+
+- name: apply new settings
+  command: sysctl --system
+
+- name: Apt-key for containerd.io [1/2]
+  become: yes
+  shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+- name: Add containerd.io repository [2/2]
+  become: yes
+  shell: |
+    echo \
+      "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: Install container runtime (CRI)
+  apt:
+    name:
+      - containerd.io
+    state: present
+    update_cache: true
+
+- name: add Kubernetes apt-key
+  become: yes
+  shell: |
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v{{ kube_version | regex_search('(\d\.\d+)') }}/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+- name: add Kubernetes' APT repository
+  become: yes
+  shell: |
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v{{ kube_version | regex_search('(\d\.\d+)') }}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: update repo
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: get OS release name
+  command: "lsb_release -cs"
+  changed_when: false
+  register: lsb_rel
+
+- name: configure containerd
+  shell: |
+    mkdir -p /etc/containerd
+    containerd config default | tee /etc/containerd/config.toml
+    sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+    systemctl restart containerd
+
+- name: install kubernetes
+  apt:
+    update_cache: yes
+    pkg:
+#      - kubelet={{ kube_version + '-00' }}
+#      - kubeadm={{ kube_version + '-00' }}
+#      - kubectl={{ kube_version + '-00' }}
+      - kubelet=1.30.1-1.1
+      - kubeadm=1.30.1-1.1
+      - kubectl=1.30.1-1.1
+
+- name: exclude kube components from apt upgrades
+  shell: |
+    apt-mark hold kubelet kubeadm kubectl containerd
+
+- name: enable containerd systemd service
+  systemd:
+    state: started
+    name: containerd.service
+    enabled: yes
+    daemon_reload: yes
+
+- name: enable kubelet systemd service
+  systemd:
+    state: started
+    name: kubelet.service
+    enabled: yes
+    daemon_reload: yes
