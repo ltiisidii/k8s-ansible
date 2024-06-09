@@ -37,12 +37,25 @@ ansible-playbook -i inventory/dev playbooks/longhorn.yaml --user appuser
 
 # Installing Istio https://www.tigera.io/blog/how-to-build-a-service-mesh-with-istio-and-calico/ (-)
 ansible-playbook -i inventory/dev playbooks/install_istio.yaml --user appuser
+kubectl label namespace default istio-injection=enabled
+
+# Install Istio Kiali (need Prometheus-Jaeger-Grafana)
+helm install \
+  --namespace istio-system \
+  --set auth.strategy="anonymous" \
+  --repo https://kiali.org/helm-charts \
+  kiali-server \
+  kiali-server
+
+# Setup Metrics-Server (*)
+ansible-playbook -i inventory/dev playbooks/metrics-server.yaml --user appuser
 
 # Setup BPG to Firewall (*)
 ansible-playbook -i inventory/dev playbooks/configure_bgp.yaml --user appuser 
 
-# Setup Metrics-Server (*)
-ansible-playbook -i inventory/dev playbooks/metrics-server.yaml --user appuser
+# Test with Google microservices demo
+kubectl create -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/release/kubernetes-manifests.yaml
+
 
 notes: 
 + test ok
