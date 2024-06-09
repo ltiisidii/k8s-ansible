@@ -1,0 +1,38 @@
+---
+- name: Descargar script de instalación de Istio
+  ansible.builtin.shell: |
+    curl -L https://git.io/getLatestIstio | ISTIO_VERSION={{ istio_version }} sh -
+  args:
+    chdir: /tmp
+
+- name: Mover el directorio de Istio a /opt
+  ansible.builtin.command: mv /tmp/istio-{{ istio_version }} /opt/
+  args:
+    creates: /opt/istio-{{ istio_version }}
+
+- name: Exportar variable de entorno para istioctl
+  ansible.builtin.shell: |
+    echo 'export PATH=$PATH:/opt/istio-{{ istio_version }}/bin' >> ~/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Aplicar el cambio en la sesión actual
+  ansible.builtin.shell: |
+    source ~/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Instalar Istio
+  ansible.builtin.shell: |
+    /opt/istio-{{ istio_version }}/bin/istioctl install --set profile=default -y
+  args:
+    executable: /bin/bash
+
+- name: Verificar la instalación de Istio
+  ansible.builtin.shell: |
+    kubectl get pods -n istio-system
+  register: result
+
+- name: Mostrar resultado de la verificación
+  ansible.builtin.debug:
+    msg: "{{ result.stdout }}"

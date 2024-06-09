@@ -26,6 +26,21 @@ kubectl get nodes
 # Verify the status of pods in kube-system namespace
 kubectl get pods -n kube-system
 
+# OPTIONAL: 
 
+# Installing Pre-reqs
+ansible-playbook -i inventory/dev playbooks/pre-reqs.yaml --user appuser
+
+# Installing Longhorn
+ansible-playbook -i inventory/dev playbooks/longhorn.yaml --user appuser
+
+# Installing Istio https://www.tigera.io/blog/how-to-build-a-service-mesh-with-istio-and-calico/
+ansible-playbook -i inventory/dev playbooks/install_istio.yaml --user appuser
+
+# Setup BPG to Firewall
+ansible-playbook -i inventory/dev playbooks/configure_bgp.yml --user appuser
+
+# Setup Metrics-Server
+ansible-playbook -i inventory/dev playbooks/metrics-server.yml --user appuser
 
 ```

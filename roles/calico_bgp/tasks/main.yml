@@ -1,0 +1,10 @@
+---
+- name: Configure Calico BGP Peers
+  become: yes
+  template:
+    src: calico_bgp.yaml.j2
+    dest: /etc/calico/resources/bgp_peer.yaml
+
+- name: Apply Calico BGP Configuration
+  become: yes
+  command: calicoctl apply -f /etc/calico/resources/bgp_peer.yaml

@@ -1,4 +1,5 @@
-kube_version: "1.30.1"
+kube_version: "1.30.1-1.1"
+istio_version: "1.22.0"
 group: "appowner"
 container_runtime: containerd
 network: calico
@@ -8,3 +9,19 @@ control_plane_ip: "{{ hostvars[groups['control_planes'][0]]['ansible_default_ipv
 
 kubeadm_opts: ""
 init_opts: ""
+
+longhorn:
+  load_balancer_ip: 192.168.254.242
+
+metrics_server:
+  enabled: true
+
+calico_asn: "64512"
+fortigate_asn: "64513"
+fortigate_ip: "192.168.252.1"
+calico_node_ips:
+  - "192.168.254.11"
+  - "192.168.254.12"
+  - "192.168.254.13"
+  - "192.168.254.14"
+calico_network_prefix: "192.168.252.128/25"

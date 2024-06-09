@@ -1,0 +1,6 @@
+---
+- name: Configure BGP between Calico and FortiGate
+  hosts: control_planes
+  become: yes
+  roles:
+    - calico_bgp

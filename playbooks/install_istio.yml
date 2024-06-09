@@ -1,0 +1,6 @@
+---
+- name: Instalar Istio en el clúster de Kubernetes
+  hosts: control_planes
+  become: yes
+  roles:
+    - istio_install

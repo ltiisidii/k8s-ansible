@@ -1,0 +1,9 @@
+---
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata:
+  name: peer-with-fortigate
+spec:
+  peerIP: {{ fortigate_ip }}
+  asNumber: {{ fortigate_asn }}
+  sourceAddress: UseNodeIP
