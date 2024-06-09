@@ -53,7 +53,7 @@ ansible-playbook -i inventory/dev playbooks/metrics-server.yaml --user appuser
 # Setup BPG to Firewall (*)
 ansible-playbook -i inventory/dev playbooks/configure_bgp.yaml --user appuser 
 
-# Test with Google microservices demo
+# Test with Google microservices demo (https://www.tigera.io/blog/how-to-build-a-service-mesh-with-istio-and-calico/)
 kubectl create -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/release/kubernetes-manifests.yaml
 
 
