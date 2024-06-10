@@ -1,29 +1,30 @@
 ---
 - name: Descargar archivos YAML de addons de Istio
-  get_url:
-    url: "{{ item.url }}"
-    dest: "/tmp/{{ item.dest }}"
-    remote_src: yes
-  with_items:
-    - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/grafana.yaml", dest: "grafana.yaml" }
-    - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/jaeger.yaml", dest: "jaeger.yaml" }
-    - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/loki.yaml", dest: "loki.yaml" }
-    - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/prometheus.yaml", dest: "prometheus.yaml" }
+  hosts: helm
+  become: yes
+  tasks:
+    - name: Descargar archivos YAML de addons de Istio
+      command: "curl -sS -o '/tmp/{{ item.dest }}' '{{ item.url }}'"
+      with_items:
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/grafana.yaml", dest: "grafana.yaml" }
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/jaeger.yaml", dest: "jaeger.yaml" }
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/loki.yaml", dest: "loki.yaml" }
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/prometheus.yaml", dest: "prometheus.yaml" }
 
-- name: Cambiar propietario de archivos descargados
-  file:
-    path: "/tmp/{{ item.dest }}"
-    owner: appuser
-  with_items:
-    - grafana.yaml
-    - jaeger.yaml
-    - loki.yaml
-    - prometheus.yaml
+    - name: Cambiar propietario de archivos descargados
+      file:
+        path: "/tmp/{{ item.dest }}"
+        owner: appuser
+      with_items:
+        - grafana.yaml
+        - jaeger.yaml
+        - loki.yaml
+        - prometheus.yaml
 
-- name: Aplicar addons de Istio
-  command: kubectl apply -f "/tmp/{{ item }}"
-  with_items:
-    - grafana.yaml
-    - jaeger.yaml
-    - loki.yaml
-    - prometheus.yaml
+    - name: Aplicar addons de Istio
+      command: kubectl apply -f "/tmp/{{ item }}"
+      with_items:
+        - grafana.yaml
+        - jaeger.yaml
+        - loki.yaml
+        - prometheus.yaml
