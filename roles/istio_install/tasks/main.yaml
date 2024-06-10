@@ -1,18 +1,18 @@
 ---
 - name: Descargar script de instalación de Istio
   ansible.builtin.shell: |
-    curl -L https://git.io/getLatestIstio | ISTIO_VERSION={{ istio_version }} sh -
+    curl -L https://git.io/getLatestIstio | ISTIO_VERSION={{ hostvars['localhost']['istio_version'] }} sh -
   args:
     chdir: /tmp
 
 - name: Mover el directorio de Istio a /opt
-  ansible.builtin.command: mv /tmp/istio-{{ istio_version }} /opt/
+  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /opt/
   args:
-    creates: /opt/istio-{{ istio_version }}
+    creates: /opt/istio-{{ hostvars['localhost']['istio_version'] }}
 
 - name: Exportar variable de entorno para istioctl
   ansible.builtin.shell: |
-    echo 'export PATH=$PATH:/opt/istio-{{ istio_version }}/bin' >> ~/.bashrc
+    echo 'export PATH=$PATH:/opt/istio-{{ hostvars['localhost']['istio_version'] }}/bin' >> ~/.bashrc
   args:
     executable: /bin/bash
 
@@ -24,7 +24,7 @@
 
 - name: Instalar Istio
   ansible.builtin.shell: |
-    /opt/istio-{{ istio_version }}/bin/istioctl install --set profile=default -y
+    /opt/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl install --set profile=default -y
   args:
     executable: /bin/bash
 

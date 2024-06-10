@@ -39,6 +39,8 @@ ansible-playbook -i inventory/dev playbooks/longhorn.yaml --user appuser
 ansible-playbook -i inventory/dev playbooks/install_istio.yml --user appuser
 kubectl label namespace default istio-injection=enabled
 
+
+
 # Install Istio Kiali (need install Prometheus-Jaeger-Grafana in istio-system Namespace with addons folder of istio)
 helm install \
   --namespace istio-system \
