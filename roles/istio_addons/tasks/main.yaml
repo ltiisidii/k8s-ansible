@@ -1,18 +1,23 @@
 ---
-- name: Descargar archivos YAML de addons de Istio
-  get_url:
-    url: "https://github.com/istio/istio/raw/main/samples/addons/{{ item }}"
-    dest: "/tmp/{{ item }}"
-  with_items:
-    - grafana.yaml
-    - jaeger.yaml
-    - loki.yaml
-    - prometheus.yaml
+- name: Descargar y aplicar addons de Istio
+  hosts: helm
+  become: yes
+  tasks:
+    - name: Descargar archivos YAML de addons de Istio
+      get_url:
+        url: "{{ item.url }}"
+        dest: "/tmp/{{ item.dest }}"
+      with_items:
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/grafana.yaml", dest: "grafana.yaml" }
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/jaeger.yaml", dest: "jaeger.yaml" }
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/loki.yaml", dest: "loki.yaml" }
+        - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/prometheus.yaml", dest: "prometheus.yaml" }
 
-- name: Aplicar addons de Istio
-  command: kubectl apply -f "/tmp/{{ item }}"
-  with_items:
-    - grafana.yaml
-    - jaeger.yaml
-    - loki.yaml
-    - prometheus.yaml
+    - name: Aplicar addons de Istio
+      command: kubectl apply -f "/tmp/{{ item }}"
+      with_items:
+        - grafana.yaml
+        - jaeger.yaml
+        - loki.yaml
+        - prometheus.yaml
+
