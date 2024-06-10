@@ -1,0 +1,20 @@
+---
+- name: Agregar repositorio Helm de Kiali
+  command: helm repo add kiali-server https://kiali.org/helm-charts
+  register: helm_repo_output
+  ignore_errors: yes
+
+- name: Actualizar repositorios Helm
+  command: helm repo update
+
+- name: Instalar Kiali Server con Helm
+  command: >
+    helm install \
+    --namespace istio-system \
+    --set auth.strategy="anonymous" \
+    kiali-server kiali-server/kiali-server
+  register: helm_install_output
+  ignore_errors: yes
+
+- debug:
+    var: helm_install_output.stdout_lines

@@ -1,0 +1,6 @@
+---
+- name: Ejecutar instalación de Kiali Server
+  hosts: helm
+  become: yes
+  roles:
+    - roles/kiali_install
