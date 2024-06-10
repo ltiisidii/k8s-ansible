@@ -40,6 +40,10 @@
   become: yes
   shell: |
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  register: apt_key_output
+
+- debug:
+    var: apt_key_output.stdout_lines
 
 - name: Add containerd.io repository [2/2]
   become: yes
