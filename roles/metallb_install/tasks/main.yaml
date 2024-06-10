@@ -1,0 +1,19 @@
+---
+- name: Descargar manifiesto de MetalLB
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/metallb/metallb/main/manifests/metallb.yaml
+    dest: /tmp/metallb.yaml
+
+- name: Eliminar sección de Speaker del manifiesto
+  ansible.builtin.shell: |
+    sed -i '/# Source: metallb\/charts\/metallb\/templates\/speaker.yaml/{N;N;N;N;d;}' /tmp/metallb.yaml
+  args:
+    executable: /bin/bash
+
+- name: Aplicar manifiesto de MetalLB
+  ansible.builtin.shell: |
+    kubectl apply -f /tmp/metallb.yaml
+  args:
+    executable: /bin/bash
+  become: true
+  become_user: appuser

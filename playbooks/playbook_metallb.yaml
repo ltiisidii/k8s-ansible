@@ -1,0 +1,7 @@
+---
+- name: Instalar MetalLB en el clúster de Kubernetes
+  hosts: control_planes
+  roles:
+    - roles/metallb_install
+  become: true
+  become_user: appuser

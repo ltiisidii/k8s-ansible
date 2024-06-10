@@ -35,11 +35,9 @@ ansible-playbook -i inventory/dev playbooks/pre-reqs.yaml --user appuser
 ansible-galaxy collection install community.kubernetes
 ansible-playbook -i inventory/dev playbooks/longhorn.yaml --user appuser
 
-# Installing Istio https://www.tigera.io/blog/how-to-build-a-service-mesh-with-istio-and-calico/ (-)
+# Installing Istio https://www.tigera.io/blog/how-to-build-a-service-mesh-with-istio-and-calico/ (+)
 ansible-playbook -i inventory/dev playbooks/install_istio.yml --user appuser
 kubectl label namespace default istio-injection=enabled
-
-
 
 # Install Istio Kiali (need install Prometheus-Jaeger-Grafana in istio-system Namespace with addons folder of istio)
 helm install \
@@ -50,6 +48,9 @@ helm install \
   kiali-server
 
 # Setup Metrics-Server (*)
+ansible-playbook -i inventory/dev playbooks/metrics-server.yaml --user appuser
+
+# Metallb_install (only metallb-system/controller, do not install the metallb-system/speaker component. The speaker component also attempts to establish BGP sessions on the node, and will conflict with Calico.)
 ansible-playbook -i inventory/dev playbooks/metrics-server.yaml --user appuser
 
 # Setup BPG to Firewall as (cloud provider) (*)
