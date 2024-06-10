@@ -5,28 +5,23 @@
   args:
     chdir: /tmp
 
-- name: Mover el directorio de Istio a /home/p00lack
-  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /home/p00lack/
+- name: Mover el directorio de Istio a /usr/local/istio
+  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /usr/local/istio
   args:
-    creates: /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}
+    creates: /usr/local/istio/istio-{{ hostvars['localhost']['istio_version'] }}
 
-- name: Exportar variable de entorno para istioctl
-  ansible.builtin.shell: |
-    echo 'export PATH=$PATH:/home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin' >> ~/.bashrc
-  args:
-    executable: /bin/bash
-  environment:
-    PATH: "{{ ansible_env.PATH }}:/home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin"
+- name: Cambiar permisos del directorio de Istio
+  ansible.builtin.command: chown -R root:root /usr/local/istio/istio-{{ hostvars['localhost']['istio_version'] }}
 
-- name: Aplicar el cambio en la sesión actual
-  ansible.builtin.shell: |
-    source ~/.bashrc
-  args:
-    executable: /bin/bash
+- name: Mover istioctl a /usr/bin
+  ansible.builtin.command: cp /usr/local/istio/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl /usr/bin/istioctl
+
+- name: Hacer istioctl ejecutable
+  ansible.builtin.command: chmod +x /usr/bin/istioctl
 
 - name: Instalar Istio
   ansible.builtin.shell: |
-    cd /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }} && ./bin/istioctl install --set profile=default -y
+    istioctl install --set profile=default -y
   args:
     executable: /bin/bash
   become: true
@@ -36,6 +31,8 @@
   ansible.builtin.shell: |
     kubectl get pods -n istio-system
   register: result
+  become: true
+  become_user: appuser
 
 - name: Mostrar resultado de la verificación
   ansible.builtin.debug:
