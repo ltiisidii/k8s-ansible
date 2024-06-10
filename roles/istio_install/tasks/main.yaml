@@ -24,15 +24,9 @@
   args:
     executable: /bin/bash
 
-- name: Copiar istioctl a /usr/bin
-  ansible.builtin.copy:
-    src: /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl
-    dest: /usr/bin/istioctl
-    mode: "0755"
-
 - name: Instalar Istio
   ansible.builtin.shell: |
-    /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl install --set profile=default -y
+    cd /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }} && ./bin/istioctl install --set profile=default -y
   args:
     executable: /bin/bash
   become: true
