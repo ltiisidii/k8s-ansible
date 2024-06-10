@@ -1,7 +1,7 @@
 ---
 - name: Descargar manifiesto de MetalLB
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/metallb/metallb/main/manifests/metallb.yaml
+    url: "https://raw.githubusercontent.com/metallb/metallb/{{ hostvars['localhost']['metallb_version'] }}/config/manifests/metallb-native.yaml"
     dest: /tmp/metallb.yaml
 
 - name: Eliminar sección de Speaker del manifiesto
