@@ -1,10 +1,11 @@
 ---
 - name: Descargar archivos YAML de addons de Istio
+  hosts: helm
   become: yes
   tasks:
     - name: Descargar archivos YAML de addons de Istio
       command: "curl -sS -o '/tmp/{{ item.dest }}' '{{ item.url }}'"
-      with_items:
+      loop:
         - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/grafana.yaml", dest: "grafana.yaml" }
         - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/jaeger.yaml", dest: "jaeger.yaml" }
         - { url: "https://raw.githubusercontent.com/istio/istio/master/samples/addons/loki.yaml", dest: "loki.yaml" }
@@ -14,7 +15,7 @@
       file:
         path: "/tmp/{{ item.dest }}"
         owner: appuser
-      with_items:
+      loop:
         - grafana.yaml
         - jaeger.yaml
         - loki.yaml
@@ -22,7 +23,7 @@
 
     - name: Aplicar addons de Istio
       command: kubectl apply -f "/tmp/{{ item }}"
-      with_items:
+      loop:
         - grafana.yaml
         - jaeger.yaml
         - loki.yaml
