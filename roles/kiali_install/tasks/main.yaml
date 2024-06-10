@@ -1,13 +1,19 @@
 ---
 - name: Agregar repositorio Helm de Kiali
+  become: yes
+  become_user: appuser
   command: helm repo add kiali-server https://kiali.org/helm-charts
   register: helm_repo_output
   ignore_errors: yes
 
 - name: Actualizar repositorios Helm
+  become: yes
+  become_user: appuser
   command: helm repo update
 
 - name: Instalar Kiali Server con Helm
+  become: yes
+  become_user: appuser
   command: >
     helm install \
     --namespace istio-system \
