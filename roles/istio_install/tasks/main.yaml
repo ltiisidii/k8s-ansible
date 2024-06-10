@@ -5,16 +5,18 @@
   args:
     chdir: /tmp
 
-- name: Mover el directorio de Istio a /opt
-  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /opt/
+- name: Mover el directorio de Istio a /home/p00lack
+  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /home/p00lack/
   args:
-    creates: /opt/istio-{{ hostvars['localhost']['istio_version'] }}
+    creates: /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}
 
 - name: Exportar variable de entorno para istioctl
   ansible.builtin.shell: |
-    echo 'export PATH=$PATH:/opt/istio-{{ hostvars['localhost']['istio_version'] }}/bin' >> ~/.bashrc
+    echo 'export PATH=$PATH:/home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin' >> ~/.bashrc
   args:
     executable: /bin/bash
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin"
 
 - name: Aplicar el cambio en la sesión actual
   ansible.builtin.shell: |
@@ -22,11 +24,19 @@
   args:
     executable: /bin/bash
 
+- name: Copiar istioctl a /usr/bin
+  ansible.builtin.copy:
+    src: /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl
+    dest: /usr/bin/istioctl
+    mode: "0755"
+
 - name: Instalar Istio
   ansible.builtin.shell: |
-    /opt/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl install --set profile=default -y
+    /home/p00lack/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl install --set profile=default -y
   args:
     executable: /bin/bash
+  become: true
+  become_user: appuser
 
 - name: Verificar la instalación de Istio
   ansible.builtin.shell: |
