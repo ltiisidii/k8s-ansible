@@ -1,6 +1,5 @@
 ---
 - name: Descargar archivos YAML de addons de Istio
-  hosts: helm
   become: yes
   tasks:
     - name: Descargar archivos YAML de addons de Istio
