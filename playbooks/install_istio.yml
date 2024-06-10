@@ -3,4 +3,4 @@
   hosts: control_planes
   become: yes
   roles:
-    - istio_install
+    - roles/istio_install
