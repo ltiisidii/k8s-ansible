@@ -1,4 +1,12 @@
 ---
+- name: Crear directorio de destino para Istio
+  ansible.builtin.file:
+    path: /usr/local/istio
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Descargar script de instalación de Istio
   ansible.builtin.shell: |
     curl -L https://git.io/getLatestIstio | ISTIO_VERSION={{ hostvars['localhost']['istio_version'] }} sh -
@@ -6,18 +14,21 @@
     chdir: /tmp
 
 - name: Mover el directorio de Istio a /usr/local/istio
-  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /usr/local/istio
+  ansible.builtin.command: mv /tmp/istio-{{ hostvars['localhost']['istio_version'] }} /usr/local/istio/
   args:
     creates: /usr/local/istio/istio-{{ hostvars['localhost']['istio_version'] }}
 
 - name: Cambiar permisos del directorio de Istio
   ansible.builtin.command: chown -R root:root /usr/local/istio/istio-{{ hostvars['localhost']['istio_version'] }}
+  become: true
 
 - name: Mover istioctl a /usr/bin
   ansible.builtin.command: cp /usr/local/istio/istio-{{ hostvars['localhost']['istio_version'] }}/bin/istioctl /usr/bin/istioctl
+  become: true
 
 - name: Hacer istioctl ejecutable
   ansible.builtin.command: chmod +x /usr/bin/istioctl
+  become: true
 
 - name: Instalar Istio
   ansible.builtin.shell: |
