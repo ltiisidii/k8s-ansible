@@ -48,6 +48,13 @@
       "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
       $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
+- name: Wait for dpkg lock to be released
+  wait_for:
+    path: /var/lib/dpkg/lock-frontend
+    state: absent
+    timeout: 300 # Tiempo máximo de espera en segundos
+  ignore_errors: yes
+
 - name: Install container runtime (CRI)
   apt:
     name:
